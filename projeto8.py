@@ -14,8 +14,8 @@ RECEPTOR
   - Os 3 áudios recuperados são salvos em audios/demodulado{1,2,3}.wav.
 
 Uso:
-    python projeto8.py [--tocar] [--sem-janela]                 # usa audios/audio1..3.wav
-    python projeto8.py musica1.mp3 voz.wav outro.flac --tocar   # usa os arquivos indicados
+    python projeto8.py [--sem-som] [--sem-janela]               # usa audios/audio1..3.wav
+    python projeto8.py musica1.mp3 voz.wav outro.flac           # usa os arquivos indicados
 Aceita wav, mp3, flac e ogg em qualquer taxa de amostragem (convertidos para 44100 Hz, máx. 5 s).
 """
 import sys
@@ -34,7 +34,7 @@ TRANSICAO = 300     # 1200 + 300 = 1500 Hz = metade da largura de cada faixa
 CORES = ["tab:blue", "tab:orange", "tab:green"]
 XLIM = (0, 22050)
 
-tocar = "--tocar" in sys.argv
+tocar = "--sem-som" not in sys.argv
 arquivos = [a for a in sys.argv[1:] if not a.startswith("--")]
 if not arquivos:
     arquivos = [f"audios/audio{i}.wav" for i in range(1, 4)]

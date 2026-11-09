@@ -5,7 +5,7 @@ Passos: (1) FFT do áudio original, (2) portadora com o mesmo nº de pontos,
 (3) passa-baixa no áudio + modulação por multiplicação, (4) FFT do modulado,
 (6) demodulação: multiplica pela portadora e aplica passa-baixa, (7) FFT do demodulado.
 
-Uso: python exercicio5.py [arquivo.wav] [--tocar] [--sem-janela]
+Uso: python exercicio5.py [arquivo.wav] [--sem-som] [--sem-janela]
 """
 import sys
 import matplotlib.pyplot as plt
@@ -18,7 +18,7 @@ F_CORTE = 1700        # 1700 Hz + transição de 300 Hz = 2000 Hz  -> cabe em 16
 
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
 arquivo = args[0] if args else "audios/audio1.wav"
-tocar = "--tocar" in sys.argv
+tocar = "--sem-som" not in sys.argv
 
 fs = FS
 audio = normaliza(le_audio(arquivo))

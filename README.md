@@ -21,7 +21,7 @@ Camada Física da Computação — Insper
 pip install numpy scipy matplotlib sounddevice
 
 # Opção A: usar arquivos prontos (wav, mp3, flac, ogg; qualquer taxa — convertidos para 44100 Hz, máx. 5 s)
-python projeto8.py musica.mp3 voz.wav efeito.flac --tocar
+python projeto8.py musica.mp3 voz.wav efeito.flac
 
 # Opção B: gravar pelo microfone em audios/audio1..3.wav
 python gravar_audios.py
@@ -29,11 +29,11 @@ python gravar_audios.py
 
 python exercicio1.py
 python exercicio3.py
-python exercicio5.py musica.mp3 --tocar
-python projeto8.py --tocar           # toca originais e demodulados, mostra os gráficos
+python exercicio5.py musica.mp3
+python projeto8.py                   # toca originais e demodulados, mostra os gráficos
 ```
 
-`--tocar` reproduz os áudios; `--sem-janela` só salva os gráficos em `figuras/`.
+Por padrão os áudios são reproduzidos; `--sem-som` desliga o som e `--sem-janela` só salva os gráficos em `figuras/`.
 
 ---
 
