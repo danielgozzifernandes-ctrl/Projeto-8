@@ -150,6 +150,7 @@ python emissor.py -v                 # mostra os bits de cada caractere e o quad
 python emissor.py --plot             # abre a figura do sinal emitido (tempo + FFT) a cada envio
 python receptor.py -v                # medidor de nível, fase, desvio de frequência, SNR, bits, símbolos
 python receptor.py --plot            # abre a figura do sinal recebido (FFT + constelação) a cada mensagem
+python receptor.py --tempo 15        # grava 15 s, demodula tudo e abre o gráfico logo em seguida
 python receptor.py --arquivo audios/psk_rx.wav --plot     # reanalisa a última gravação
 python emissor.py -m "teste" --sem-som                    # só gera audios/psk_tx.wav
 python receptor.py --arquivo audios/psk_tx.wav -v         # demodula o arquivo (teste sem microfone)

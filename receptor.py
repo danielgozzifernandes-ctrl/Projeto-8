@@ -10,6 +10,7 @@ Uso:
     python receptor.py --taxa 200 --fc 3000     # mesmos parâmetros usados no emissor!
     python receptor.py -v                       # mostra nível do sinal, fase, SNR, bits...
     python receptor.py --plot                   # abre a FFT do sinal recebido a cada mensagem
+    python receptor.py --tempo 15               # grava 15 s, demodula tudo e abre o gráfico
     python receptor.py --arquivo audios/psk_tx.wav --plot    # demodula um arquivo WAV
 """
 import argparse
@@ -103,10 +104,13 @@ def main():
     p.add_argument("--arquivo", help="demodula um arquivo de áudio em vez do microfone")
     p.add_argument("-v", "--verbose", action="store_true", help="mostra detalhes da demodulação")
     p.add_argument("--plot", action="store_true", help="abre a figura do sinal recebido após cada mensagem")
+    p.add_argument("--tempo", type=float, help="grava só esse número de segundos, demodula e abre o gráfico")
     p.add_argument("--wav", default="audios/psk_rx.wav", help="onde salvar o último áudio recebido")
     args = p.parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # acentos/emoji no terminal do Windows
     cfg = config_de(args)
+    if args.tempo:
+        args.plot = True
     if not args.arquivo:
         # grava na taxa nativa do microfone (48 kHz em muitos notebooks) e demodula nessa mesma taxa:
         # evita a conversão de taxa do driver, que pode introduzir falhas no áudio
@@ -133,14 +137,15 @@ def main():
             salva_wav(args.wav, x, fs=cfg.fs)
         if not quadros:
             print(f"  (nenhum preâmbulo encontrado em {len(x) / cfg.fs:.1f} s de {origem})")
-            return
+            if not args.tempo:          # com --tempo o gráfico abre mesmo assim: mostra se a portadora chegou
+                return
         texto = "".join(q.texto for q in quadros if q.ok)
         if texto:
             print(f"\noutro> {texto}", flush=True)
         for q in quadros:
             if not q.ok:
                 print(f"  ✗ quadro com erro: {q.motivo}" + (f" — texto parcial: {q.texto!r}" if q.texto else ""))
-            if args.verbose or args.arquivo:
+            if args.verbose or args.arquivo or args.tempo:
                 mostra_detalhes(q)
         if graficos is not None:
             graficos.submit(salva_figura_recebido, x, cfg, "figuras/psk_recebido.png")
@@ -157,6 +162,27 @@ def main():
 
     if args.arquivo:
         processa(le_audio(args.arquivo, duracao_max=600), args.arquivo)
+        return
+
+    if args.tempo:
+        # grava um trecho de duração fixa (com contagem regressiva) e só depois demodula tudo;
+        # Ctrl+C encerra antes e processa o que já foi gravado
+        import time
+        x = sd.rec(int(args.tempo * cfg.fs), samplerate=cfg.fs, channels=1, device=args.dispositivo)
+        nome = sd.query_devices(args.dispositivo, "input")["name"]
+        print(f"🎙 Gravando {args.tempo:g} s de {nome} a {cfg.fs} Hz... envie a mensagem agora (Ctrl+C para parar antes)")
+        t0 = time.time()
+        try:
+            while (falta := args.tempo - (time.time() - t0)) > 0:
+                print(f"\r   faltam {falta:4.1f} s ", end="", flush=True)
+                time.sleep(0.1)
+            sd.wait()
+            gravado = len(x)
+        except KeyboardInterrupt:
+            sd.stop()
+            gravado = min(len(x), int((time.time() - t0) * cfg.fs))
+        print(f"\r   gravação encerrada ({gravado / cfg.fs:.1f} s). Demodulando...")
+        processa(x[:gravado, 0], "microfone")
         return
 
     fila = queue.Queue()
