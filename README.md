@@ -259,12 +259,17 @@ mostra os dois pontos ±1 do BPSK; quanto mais espalhados, menor o SNR.
 
 ## Dicas para a apresentação
 - **Volume** do emissor alto (sem distorcer) e os notebooks a ~30–50 cm.
-- Desligue os **"Aprimoramentos de áudio" / supressão de ruído** do microfone do receptor
-  (Configurações → Sistema → Som → microfone → Aprimoramentos de áudio: *Desativado*). Supressores de ruído
-  tratam um tom contínuo como "ruído" e o apagam. Neste notebook (Intel Smart Sound) o microfone cancela o
-  próprio som do alto-falante, então **um computador não consegue receber o que ele mesmo toca pelo ar**.
-  Entre dois computadores isso não acontece. Para testar sozinho, use a "Mixagem estéreo":
-  `python receptor.py --dispositivo 13` (veja o índice com `python -m sounddevice`).
+- **Use um microfone sem processamento.** O microfone padrão do Windows passa por supressão de ruído e
+  cancelamento de eco, que tratam o tom da portadora como "ruído": o começo do sinal chega forte e em ~0,1 s
+  é atenuado em 30–45 dB, e nenhum quadro é encontrado (sintoma: a FFT mostra um pico em 4 kHz, mas
+  "nada decodificado"). Outro sinal desse processamento: o espectro do microfone acaba em ~8 kHz.
+  Neste notebook (Intel Smart Sound) o microfone cru é o **dispositivo 21** (`Grupo de microfones 2 (),
+  Windows WDM-KS`, 48 kHz):
+  `python receptor.py --dispositivo 21` ou `python receptor.py --tempo 6 --dispositivo 21`.
+  Por ele o notebook recebe até o que ele mesmo toca pelo ar (testado: SNR ≈ 12–15 dB, 0 erros).
+  Em outro computador, procure em `python -m sounddevice` uma entrada de microfone "Windows WDM-KS", ou
+  desligue os **Aprimoramentos de áudio** (Configurações → Sistema → Som → microfone → *Desativado*).
+  A "Mixagem estéreo" (`--dispositivo 13`) também serve para testar sem passar pelo ar.
 - `python receptor.py -v` mostra um medidor do nível na banda da portadora: ao tocar, ele deve subir bem
   (> 15 dB). Se não subir, verifique volume, dispositivo e se a portadora (`--fc`) é a mesma nos dois lados.
 - Se o ambiente for barulhento, tente outra portadora (`--fc 5000`) ou uma taxa menor (`--taxa 50`).
